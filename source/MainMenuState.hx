@@ -261,6 +261,10 @@ class MainMenuState extends MusicBeatState
 				selectedSomethin = true;
 				MusicBeatState.switchState(new MasterEditorMenu());
 			}
+			else if (FlxG.keys.anyJustPressed([TAB]))
+			{
+				LoadingState.loadAndSwitchState(new challenges.ChallengesState());
+			}
 			#end
 		}
 
