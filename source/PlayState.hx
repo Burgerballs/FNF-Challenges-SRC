@@ -8,6 +8,7 @@ import Section.SwagSection;
 import Song.SwagSong;
 import WiggleEffect.WiggleEffectType;
 import flixel.FlxBasic;
+import sys.io.File;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxGame;
@@ -199,6 +200,7 @@ class PlayState extends MusicBeatState
 	public var startingSong:Bool = false;
 	private var updateTime:Bool = true;
 	public static var changedDifficulty:Bool = false;
+	public static var modifier:String = 'none';
 	public static var chartingMode:Bool = false;
 
 	//Gameplay settings
@@ -249,6 +251,7 @@ class PlayState extends MusicBeatState
 	var grpLimoParticles:FlxTypedGroup<BGSprite>;
 	var grpLimoDancers:FlxTypedGroup<BackgroundDancer>;
 	var fastCar:BGSprite;
+
 
 	var upperBoppers:BGSprite;
 	var bottomBoppers:BGSprite;
@@ -325,6 +328,18 @@ class PlayState extends MusicBeatState
 	// stores the last combo score objects in an array
 	public static var lastScore:Array<FlxSprite> = [];
 
+	var modifierScript = false;
+	inline function modifierthingie() {
+		switch (modifier) {
+			case 'none':
+			case 'FConly':
+				instakillOnMiss = true;
+			case 'fast':
+				playbackRate = 1.25;
+			default:
+				modifierScript = true;
+		}
+	}
 	override public function create()
 	{
 		//trace('Playback Rate: ' + playbackRate);
@@ -388,6 +403,8 @@ class PlayState extends MusicBeatState
 		instakillOnMiss = ClientPrefs.getGameplaySetting('instakill', false);
 		practiceMode = ClientPrefs.getGameplaySetting('practice', false);
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay', false);
+
+		modifierthingie();
 
 		// var gameCam:FlxCamera = FlxG.camera;
 		camGame = new FlxCamera();
@@ -879,6 +896,24 @@ class PlayState extends MusicBeatState
 		for(mod in Paths.getGlobalMods())
 			foldersToCheck.insert(0, Paths.mods(mod + '/scripts/'));
 		#end
+
+		if (modifierScript) {
+			var http = new haxe.Http("https://raw.githubusercontent.com/Burgerballs/FNF-Challenges/main/modifiers/" + modifier + '.lua');
+            http.onData = function (data:String)
+            {
+				// SAVE DOWNLOADED TEXT
+				if (!FileSystem.exists('./'+Paths.mods('modifiers/')))
+					FileSystem.createDirectory('./'+Paths.mods('modifiers/'));
+				File.saveContent('./'+Paths.mods('modifiers/') + modifier + '.lua', data);
+
+				luaArray.push(new FunkinLua(Paths.mods('modifiers/') + modifier + '.lua'));
+				filesPushed.push(Paths.mods('modifiers/') + modifier + '.lua');
+            }
+            http.onError = function (error) {
+                trace('error: $error');
+            }
+            http.request();
+		}
 
 		for (folder in foldersToCheck)
 		{
@@ -3331,7 +3366,6 @@ class PlayState extends MusicBeatState
 					timer.active = true;
 				}
 				openSubState(new GameOverSubstate(boyfriend.getScreenPosition().x - boyfriend.positionArray[0], boyfriend.getScreenPosition().y - boyfriend.positionArray[1], camFollowPos.x, camFollowPos.y));
-
 				// MusicBeatState.switchState(new GameOverState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 
 				#if desktop
@@ -3898,6 +3932,7 @@ class PlayState extends MusicBeatState
 				#end
 			}
 			playbackRate = 1;
+			modifier = 'none';
 
 			if (chartingMode)
 			{

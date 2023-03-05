@@ -87,8 +87,9 @@ class FunkinLua {
 
 		//LuaL.dostring(lua, CLENSE);
 		try{
-			var result:Dynamic = LuaL.dofile(lua, script);
+			var result:Dynamic =  LuaL.dofile(lua, script);
 			var resultStr:String = Lua.tostring(lua, result);
+
 			if(resultStr != null && result != 0) {
 				trace('Error on lua script! ' + resultStr);
 				#if windows

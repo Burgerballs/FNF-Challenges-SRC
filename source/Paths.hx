@@ -42,6 +42,7 @@ class Paths
 		'shaders',
 		'videos',
 		'images',
+		'modifiers',
 		'stages',
 		'weeks',
 		'fonts',

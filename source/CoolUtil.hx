@@ -55,6 +55,11 @@ class CoolUtil
 		return difficulties[PlayState.storyDifficulty].toUpperCase();
 	}
 
+	public static function difficultyInt(str:String):Int
+	{
+		return difficulties.indexOf(str);
+	}
+
 	inline public static function boundTo(value:Float, min:Float, max:Float):Float {
 		return Math.max(min, Math.min(max, value));
 	}

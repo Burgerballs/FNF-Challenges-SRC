@@ -38,6 +38,9 @@ class ChallengesState extends MusicBeatState
 	var selectorLeft:Alphabet;
 	var selectorRight:Alphabet;
 
+	private var descBox:FlxSprite;
+	private var descText:FlxText;
+
 	override function create() {
 		#if desktop
 		DiscordClient.changePresence("Challenges Menu", null);
@@ -98,6 +101,16 @@ class ChallengesState extends MusicBeatState
 		selectorRight = new Alphabet(0, 0, '<', true);
 		add(selectorRight);
 
+		descBox = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		descBox.alpha = 0.6;
+		add(descBox);
+
+		descText = new FlxText(50, 600, 1180, "", 32);
+		descText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		descText.scrollFactor.set();
+		descText.borderSize = 2.4;
+		add(descText);
+
 		changeSelection();
 
 		super.create();
@@ -119,7 +132,19 @@ class ChallengesState extends MusicBeatState
 		}
 
 		if (controls.ACCEPT) {
-			// nuh uh
+			persistentUpdate = false;
+			CoolUtil.difficulties = CoolUtil.defaultDifficulties.copy();
+			var songLowercase:String = Paths.formatToSongPath(cools[curSelected].songShit[0]);
+			var poop:String = Highscore.formatSong(songLowercase, cools[curSelected].songShit[1]); // i probably might not implement lower difficulties cuz nobody plays them lol!
+
+			PlayState.SONG = Song.loadFromJson(poop, songLowercase);
+			PlayState.isStoryMode = false;
+			PlayState.storyDifficulty = cools[curSelected].songShit[1];
+			PlayState.modifier = cools[curSelected].modifier;
+			
+			LoadingState.loadAndSwitchState(new PlayState());
+
+			FlxG.sound.music.volume = 0;
 		}
 	}
 	
@@ -131,6 +156,13 @@ class ChallengesState extends MusicBeatState
 			curSelected = 0;
 
 		var bullShit:Int = 0;
+
+		descText.text = cools[curSelected].desc;
+		descText.screenCenter(Y);
+		descText.y += 270;
+		descBox.setPosition(descText.x - 10, descText.y - 10);
+		descBox.setGraphicSize(Std.int(descText.width + 20), Std.int(descText.height + 25));
+		descBox.updateHitbox();
 
 		for (item in grpOptions.members) {
 			item.targetY = bullShit - curSelected;
@@ -153,12 +185,12 @@ class ChallengeData {
     public var name:String = 'NONAME';
     public var desc:String = 'NODESC';
     public var modifier:String = 'NOMOD';
-    public var songShit:Array<String> = [
+    public var songShit:Array<Dynamic> = [
         'Bopeebo',
-        'Hard'
+        2
     ];
 
-    public function new(name:String, desc:String, modifier:String, songShit:Array<String>) {
+    public function new(name:String, desc:String, modifier:String, songShit:Array<Dynamic>) {
         this.name = name;
         this.desc = desc;
         this.modifier = modifier;
